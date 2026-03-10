@@ -1,12 +1,12 @@
 <template>
-    <AppModal :open="open" :title="title" @close="emit('close')">
+    <AppModal :open="open && !isRecipientModalOpen" :title="title" @close="emit('close')">
         <div class=" flex flex-col gap-3 justify-center items-center">
             <p class="text-center text-gray-500 dark:text-gray-400">Enter amount </p>
             <input type="text" :value="fromAmountInput" inputmode="decimal"
                 class="w-full text-4xl font-semibold bg-transparent focus:outline-none text-center" placeholder="0.00"
-                @focus="handleAmountFocus('from')"
-                @input="handleAmountInput('from', ($event.target as HTMLInputElement).value)"
-                @blur="handleAmountBlur('from')" autofocus="true" />
+                @focus="handleAmountFocus"
+                @input="handleAmountInput(($event.target as HTMLInputElement).value)"
+                @blur="handleAmountBlur" autofocus="true" />
 
             <CurrencyPicker id="from-currency" v-model="fromCurrency" class="" />
             <Icon name="lucide:arrow-left-right"
@@ -38,19 +38,34 @@
                 :to-currency="toCurrency"
                 :quote-countdown-label="quoteCountdownLabel"
                 :proceed-disabled="!fromAmount || quoteLoading"
+                @proceed="handleProceedToRecipient"
             />
         </div>
     </AppModal>
+
+    <RecipientDetailsModal
+        :open="open && isRecipientModalOpen"
+        :recipient-name="recipientName"
+        :recipient-account-or-wallet="recipientAccountOrWallet"
+        :recipient-email="recipientEmail"
+        :recipient-note="recipientNote"
+        :recipient-errors="recipientErrors"
+        @close="handleRecipientModalClose"
+        @back="handleBackToQuote"
+        @confirm="handleConfirmAndSend"
+        @update:recipient-name="recipientName = $event"
+        @update:recipient-account-or-wallet="recipientAccountOrWallet = $event"
+        @update:recipient-email="recipientEmail = $event"
+        @update:recipient-note="recipientNote = $event"
+    />
 </template>
 
 <script setup lang="ts">
 import AppModal from "~/components/shared/AppModal.vue";
 import CurrencyPicker from "../shared/CurrencyPicker.vue";
 import QuoteDetails from "./QuoteDetails.vue";
-import { QUOTE_EXPIRY_SECONDS } from "~/config/quote";
-import { fetchQuote } from "~/services/quoteService";
-import type { QuoteResponse } from "~/types/quote";
-import { formatCurrencyValue } from "~/utils/formatters";
+import RecipientDetailsModal from "./RecipientDetailsModal.vue";
+import { useQuoteModal } from "~/hooks/useQuoteModal";
 
 const props = withDefaults(
     defineProps<{
@@ -65,166 +80,40 @@ const props = withDefaults(
 const emit = defineEmits<{
     close: [];
 }>();
-
-const fromCurrency = ref("USD");
-const toCurrency = ref("NGN");
-const fromAmount = ref(0);
-const toAmount = ref(0);
-const fromDraft = ref("");
-const toDraft = ref("");
-const editingFrom = ref(false);
-const editingTo = ref(false);
-const quoteLoading = ref(false);
-const quoteError = ref<string | null>(null);
-const quoteResult = ref<QuoteResponse | null>(null);
-const quoteCountdown = ref(QUOTE_EXPIRY_SECONDS);
-
-let countdownIntervalId: ReturnType<typeof setInterval> | null = null;
-
-const stopCountdown = () => {
-    if (!countdownIntervalId) {
-        return;
-    }
-
-    clearInterval(countdownIntervalId);
-    countdownIntervalId = null;
-};
-
-const clearQuoteResult = () => {
-    quoteResult.value = null;
-    quoteCountdown.value = QUOTE_EXPIRY_SECONDS;
-    stopCountdown();
-};
-
-const startCountdown = () => {
-    stopCountdown();
-    quoteCountdown.value = QUOTE_EXPIRY_SECONDS;
-
-    countdownIntervalId = setInterval(() => {
-        if (quoteCountdown.value <= 1) {
-            clearQuoteResult();
-            return;
-        }
-
-        quoteCountdown.value -= 1;
-    }, 1000);
-};
-
-const quoteCountdownLabel = computed(() => {
-    const minutes = Math.floor(quoteCountdown.value / 60);
-    const seconds = quoteCountdown.value % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-});
-
-const parseMoneyInput = (value: string): number => {
-    const normalized = value.replace(/,/g, "").replace(/[^0-9.]/g, "");
-    const parsed = Number(normalized);
-
-    if (Number.isNaN(parsed)) {
-        return 0;
-    }
-
-    return parsed;
-};
-
-const sanitizeMoneyInput = (value: string): string => {
-    const cleaned = value.replace(/,/g, "").replace(/[^0-9.]/g, "");
-    const [whole = "", ...rest] = cleaned.split(".");
-    const decimals = rest.join("").slice(0, 2);
-
-    return rest.length > 0 ? `${whole}.${decimals}` : whole;
-};
-
-const fromAmountInput = computed({
-    get: () => (editingFrom.value ? fromDraft.value : formatCurrencyValue(fromAmount.value)),
-    set: () => { },
-});
-
-const toAmountInput = computed({
-    get: () => (editingTo.value ? toDraft.value : formatCurrencyValue(toAmount.value)),
-    set: () => { },
-});
-
-const handleAmountFocus = (field: "from" | "to") => {
-    if (field === "from") {
-        editingFrom.value = true;
-        fromDraft.value = fromAmount.value ? String(fromAmount.value) : "";
-        return;
-    }
-
-    editingTo.value = true;
-    toDraft.value = toAmount.value ? String(toAmount.value) : "";
-};
-
-const handleAmountInput = (field: "from" | "to", value: string) => {
-    const sanitized = sanitizeMoneyInput(value);
-
-    if (field === "from") {
-        fromDraft.value = sanitized;
-        fromAmount.value = parseMoneyInput(sanitized);
-        return;
-    }
-
-    toDraft.value = sanitized;
-    toAmount.value = parseMoneyInput(sanitized);
-};
-
-const handleAmountBlur = (field: "from" | "to") => {
-    if (field === "from") {
-        editingFrom.value = false;
-        fromDraft.value = formatCurrencyValue(fromAmount.value);
-        return;
-    }
-
-    editingTo.value = false;
-    toDraft.value = formatCurrencyValue(toAmount.value);
-};
-
-const switchCurrencies = () => {
-    const temp = fromCurrency.value;
-    fromCurrency.value = toCurrency.value;
-    toCurrency.value = temp;
-};
-
-const handleGetQuote = async () => {
-    if (!fromAmount.value) {
-        return;
-    }
-
-    quoteLoading.value = true;
-    quoteError.value = null;
-
-    try {
-        const response = await fetchQuote({
-            amount: fromAmount.value,
-            fromCurrency: fromCurrency.value,
-            toCurrency: toCurrency.value,
-        });
-
-        quoteResult.value = response;
-        startCountdown();
-        toAmount.value = response.recipientGets;
-        toDraft.value = formatCurrencyValue(response.recipientGets);
-    } catch (error) {
-        quoteError.value = error instanceof Error ? error.message : "Unable to get quote right now.";
-    } finally {
-        quoteLoading.value = false;
-    }
-};
+const {
+    fromCurrency,
+    toCurrency,
+    fromAmount,
+    quoteLoading,
+    quoteError,
+    quoteResult,
+    quoteCountdownLabel,
+    isRecipientModalOpen,
+    recipientName,
+    recipientAccountOrWallet,
+    recipientEmail,
+    recipientNote,
+    recipientErrors,
+    fromAmountInput,
+    handleAmountFocus,
+    handleAmountInput,
+    handleAmountBlur,
+    switchCurrencies,
+    handleGetQuote,
+    handleProceedToRecipient,
+    handleBackToQuote,
+    handleConfirmAndSend,
+    handleRecipientModalClose,
+    resetForModalClose,
+} = useQuoteModal(() => emit("close"));
 
 watch(
     () => props.open,
     (isOpen) => {
         if (!isOpen) {
-            clearQuoteResult();
-            quoteError.value = null;
+            resetForModalClose();
         }
     }
 );
-
-onBeforeUnmount(() => {
-    stopCountdown();
-});
-
 
 </script>

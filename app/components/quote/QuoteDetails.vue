@@ -26,6 +26,7 @@
       type="button"
       :disabled="proceedDisabled"
       class="mt-5 inline-flex items-center justify-center rounded-md p-3 w-full border border-primary/40 text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+      @click="emit('proceed')"
     >
       Proceed to Send ({{ quoteCountdownLabel }})
       <Icon name="lucide:arrow-right" class="ml-2 h-4 w-4" />
@@ -43,5 +44,9 @@ defineProps<{
   toCurrency: string;
   quoteCountdownLabel: string;
   proceedDisabled: boolean;
+}>();
+
+const emit = defineEmits<{
+  proceed: [];
 }>();
 </script>
