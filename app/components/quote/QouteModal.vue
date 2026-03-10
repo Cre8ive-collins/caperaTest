@@ -1,5 +1,5 @@
 <template>
-    <AppModal :open="open && !isRecipientModalOpen" :title="title" @close="emit('close')">
+    <AppModal :open="open && !isRecipientModalOpen && !isTransactionStatusModalOpen" :title="title" @close="emit('close')">
         <div class=" flex flex-col gap-3 justify-center items-center">
             <p class="text-center text-gray-500 dark:text-gray-400">Enter amount </p>
             <input type="text" :value="fromAmountInput" inputmode="decimal"
@@ -44,7 +44,7 @@
     </AppModal>
 
     <RecipientDetailsModal
-        :open="open && isRecipientModalOpen"
+        :open="open && isRecipientModalOpen && !isTransactionStatusModalOpen"
         :recipient-name="recipientName"
         :recipient-account-or-wallet="recipientAccountOrWallet"
         :recipient-email="recipientEmail"
@@ -58,6 +58,15 @@
         @update:recipient-email="recipientEmail = $event"
         @update:recipient-note="recipientNote = $event"
     />
+
+    <TransactionStatusModal
+        :open="open && isTransactionStatusModalOpen"
+        :status="transactionStatus"
+        :from-currency="transactionStatusFromCurrency"
+        @close="handleTransactionStatusClose"
+        @send-more="handleSendMore"
+        @view-transactions="handleViewTransactions"
+    />
 </template>
 
 <script setup lang="ts">
@@ -65,6 +74,7 @@ import AppModal from "~/components/shared/AppModal.vue";
 import CurrencyPicker from "../shared/CurrencyPicker.vue";
 import QuoteDetails from "./QuoteDetails.vue";
 import RecipientDetailsModal from "./RecipientDetailsModal.vue";
+import TransactionStatusModal from "./TransactionStatusModal.vue";
 import { useQuoteModal } from "~/hooks/useQuoteModal";
 
 const props = withDefaults(
@@ -89,6 +99,9 @@ const {
     quoteResult,
     quoteCountdownLabel,
     isRecipientModalOpen,
+    isTransactionStatusModalOpen,
+    transactionStatus,
+    transactionStatusFromCurrency,
     recipientName,
     recipientAccountOrWallet,
     recipientEmail,
@@ -104,6 +117,9 @@ const {
     handleBackToQuote,
     handleConfirmAndSend,
     handleRecipientModalClose,
+    handleTransactionStatusClose,
+    handleSendMore,
+    handleViewTransactions,
     resetForModalClose,
 } = useQuoteModal(() => emit("close"));
 

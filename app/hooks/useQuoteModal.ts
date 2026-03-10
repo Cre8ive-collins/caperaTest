@@ -8,6 +8,7 @@ export const useQuoteModal = (onClose: () => void) => {
   const DEFAULT_FROM_CURRENCY = "USD";
   const DEFAULT_TO_CURRENCY = "NGN";
   const currentTransactionStore = useCurrentTransactionStore();
+  const router = useRouter();
 
   const fromCurrency = ref(DEFAULT_FROM_CURRENCY);
   const toCurrency = ref(DEFAULT_TO_CURRENCY);
@@ -19,6 +20,9 @@ export const useQuoteModal = (onClose: () => void) => {
   const quoteResult = ref<QuoteResponse | null>(null);
   const quoteCountdown = ref(QUOTE_EXPIRY_SECONDS);
   const isRecipientModalOpen = ref(false);
+  const isTransactionStatusModalOpen = ref(false);
+  const transactionStatus = ref<"loading" | "success">("loading");
+  const transactionStatusFromCurrency = ref("");
 
   const recipientName = ref("");
   const recipientAccountOrWallet = ref("");
@@ -75,8 +79,17 @@ export const useQuoteModal = (onClose: () => void) => {
     clearQuoteResult();
     quoteError.value = null;
     isRecipientModalOpen.value = false;
+    isTransactionStatusModalOpen.value = false;
+    transactionStatus.value = "loading";
+    transactionStatusFromCurrency.value = "";
     clearRecipientForm();
     currentTransactionStore.clearCurrentTransaction();
+  };
+
+  const simulateTransactionApi = async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2000);
+    });
   };
 
   const startCountdown = () => {
@@ -212,10 +225,12 @@ export const useQuoteModal = (onClose: () => void) => {
     clearQuoteResult();
   };
 
-  const handleConfirmAndSend = () => {
+  const handleConfirmAndSend = async () => {
     if (!validateRecipientForm()) {
       return;
     }
+
+    transactionStatusFromCurrency.value = fromCurrency.value;
 
     console.log("Transaction payload", {
       transaction: currentTransactionStore.currentTransaction,
@@ -227,13 +242,39 @@ export const useQuoteModal = (onClose: () => void) => {
       },
     });
 
-    resetForModalClose();
-    onClose();
+    clearQuoteForm();
+    clearQuoteResult();
+    clearRecipientForm();
+    currentTransactionStore.clearCurrentTransaction();
+    quoteError.value = null;
+    isRecipientModalOpen.value = false;
+    isTransactionStatusModalOpen.value = true;
+    transactionStatus.value = "loading";
+
+    await simulateTransactionApi();
+    transactionStatus.value = "success";
   };
 
   const handleRecipientModalClose = () => {
     resetForModalClose();
     onClose();
+  };
+
+  const handleTransactionStatusClose = () => {
+    resetForModalClose();
+    onClose();
+  };
+
+  const handleSendMore = () => {
+    isTransactionStatusModalOpen.value = false;
+    transactionStatus.value = "loading";
+    transactionStatusFromCurrency.value = "";
+  };
+
+  const handleViewTransactions = async () => {
+    resetForModalClose();
+    onClose();
+    await router.push("/transactions");
   };
 
   onBeforeUnmount(() => {
@@ -249,6 +290,9 @@ export const useQuoteModal = (onClose: () => void) => {
     quoteResult,
     quoteCountdownLabel,
     isRecipientModalOpen,
+    isTransactionStatusModalOpen,
+    transactionStatus,
+    transactionStatusFromCurrency,
     recipientName,
     recipientAccountOrWallet,
     recipientEmail,
@@ -264,6 +308,9 @@ export const useQuoteModal = (onClose: () => void) => {
     handleBackToQuote,
     handleConfirmAndSend,
     handleRecipientModalClose,
+    handleTransactionStatusClose,
+    handleSendMore,
+    handleViewTransactions,
     resetForModalClose,
   };
 };
