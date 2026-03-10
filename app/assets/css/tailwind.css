@@ -1,3 +1,45 @@
+@font-face {
+	font-family: "Roobert PRO";
+	src: url("../fonts/roobert-pro/RoobertPRO-Light.woff2") format("woff2"),
+		url("../fonts/roobert-pro/RoobertPRO-Light.woff") format("woff");
+	font-style: normal;
+	font-weight: 300;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Roobert PRO";
+	src: url("../fonts/roobert-pro/RoobertPRO-Regular.woff2") format("woff2"),
+		url("../fonts/roobert-pro/RoobertPRO-Regular.woff") format("woff");
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Roobert PRO";
+	src: url("../fonts/roobert-pro/RoobertPRO-Medium.woff2") format("woff2"),
+		url("../fonts/roobert-pro/RoobertPRO-Medium.woff") format("woff");
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Roobert PRO";
+	src: url("../fonts/roobert-pro/RoobertPRO-Bold.woff2") format("woff2"),
+		url("../fonts/roobert-pro/RoobertPRO-Bold.woff") format("woff");
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	body {
+		@apply font-sans;
+	}
+}

@@ -1,14 +1,32 @@
-<template>
-  <div class="min-h-screen bg-white text-gray-900">
-    <header class="border-b border-gray-200">
-      <nav class="mx-auto flex max-w-3xl gap-6 p-4">
-        <NuxtLink to="/" class="hover:underline">Home</NuxtLink>
-        <NuxtLink to="/transactions" class="hover:underline">Transactions</NuxtLink>
-      </nav>
-    </header>
+<script setup lang="ts">
+const theme = useThemeStore();
 
-    <main class="mx-auto max-w-3xl p-6">
+onMounted(() => {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    theme.setDarkMode(true);
+  } else if (savedTheme === "light") {
+    theme.setDarkMode(false);
+  } else {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    theme.setDarkMode(prefersDark);
+  }
+
+  document.documentElement.classList.toggle("dark", theme.isDark);
+});
+
+watch(
+  () => theme.isDark,
+  (isDark) => {
+    document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }
+);
+</script>
+
+<template>
+  <NuxtLayout>
       <NuxtPage />
-    </main>
-  </div>
+  </NuxtLayout>
 </template>
