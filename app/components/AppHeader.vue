@@ -23,6 +23,7 @@ const closeMobileMenu = () => {
       <nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[15px] font-medium tracking-[0.01em] text-gray-700 dark:text-gray-300 md:flex">
         <NuxtLink to="/" class="transition-colors hover:text-black dark:hover:text-white">Home</NuxtLink>
         <NuxtLink to="/transactions" class="transition-colors hover:text-black dark:hover:text-white">Transactions</NuxtLink>
+        <NuxtLink to="/rates" class="transition-colors hover:text-black dark:hover:text-white">Rates</NuxtLink>
       </nav>
 
       <div class="flex items-center gap-3">
@@ -54,6 +55,7 @@ const closeMobileMenu = () => {
       <nav class="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-4 text-base font-medium tracking-[0.01em] text-gray-700 dark:text-gray-300 sm:px-6 lg:px-8">
         <NuxtLink to="/" class="transition-colors hover:text-black dark:hover:text-white" @click="closeMobileMenu">Home</NuxtLink>
         <NuxtLink to="/transactions" class="transition-colors hover:text-black dark:hover:text-white" @click="closeMobileMenu">Transactions</NuxtLink>
+        <NuxtLink to="/rates" class="transition-colors hover:text-black dark:hover:text-white" @click="closeMobileMenu">Rates</NuxtLink>
 
         <div class="mt-2 flex items-center gap-3 border-t border-gray-200 pt-4 dark:border-gray-800">
           <button

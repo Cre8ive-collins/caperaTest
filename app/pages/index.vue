@@ -1,16 +1,12 @@
-<script setup lang="ts">
-const counter = useCounterStore();
-</script>
-
 <template>
-  <section>
-    <h1 class="text-primary text-4xl font-bold leading-tight tracking-[-0.02em]">Hello World</h1>
-    <p class="mt-4 text-base font-normal text-gray-700 dark:text-gray-300">Count: {{ counter.count }}</p>
-    <button
-      class="mt-4 rounded bg-primary px-4 py-2 text-sm font-medium text-white"
-      @click="counter.increment"
-    >
-      Increment
-    </button>
+  <section class="space-y-5">
+    <div class=" flex justify-between">
+      <h1 class="text-primary text-2xl font-bold leading-tight tracking-[-0.02em]">Market Overview</h1>
+      <button type="button" aria-label="Refresh rates"
+        class="inline-flex items-center justify-center rounded-md px-8 border border-primary/40 text-primary transition-colors hover:bg-primary/10">
+        New Quote
+      </button>
+    </div>
+    <FxRateTracker />
   </section>
 </template>
