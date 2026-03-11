@@ -1,7 +1,14 @@
 <template>
-  <section>
-    <h1 class="text-primary text-2xl font-bold leading-tight tracking-[-0.02em]">Transactions</h1>
-    <p class="mt-3 text-base font-normal text-gray-700 dark:text-gray-300">This is the transactions page with ordinary
-      text.</p>
+  <section class="space-y-5">
+    <div class="md:flex justify-between items-center">
+      <h1 class="text-primary text-2xl font-bold leading-tight tracking-[-0.02em]">Transactions</h1>
+      <QouteModal title="New Quote" />
+    </div>
+    <TransactionsTable title="All Transactions" :show-all="true" :show-filters="true" :page-size="10" />
   </section>
 </template>
+
+<script setup lang="ts">
+import TransactionsTable from "~/components/transactions/TransactionsTable.vue";
+import QouteModal from '~/components/quote/QouteModal.vue';
+</script>

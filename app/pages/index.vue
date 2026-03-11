@@ -1,22 +1,23 @@
-
-
 <template>
-  <section class="space-y-5">
-    <div class=" flex justify-between">
-      <h1 class="text-primary text-2xl font-bold leading-tight tracking-[-0.02em]">Market Overview</h1>
-      <button type="button" aria-label="Refresh rates" @click="openQuoteModal = true"
-        class="inline-flex items-center justify-center rounded-md px-8 border border-primary/40 text-primary transition-colors hover:bg-primary/10">
-        New Quote
-      </button>
-    </div>
-    <FxRateTracker />
-    <QouteModal :open="openQuoteModal" title="New Quote" @close="openQuoteModal = false">
-      <p>This is a quote modal. You can place your quote form here.</p>
-    </QouteModal>
-  </section>
+  <div class=" flex flex-col gap-10">
+    <section class="space-y-5">
+      <div class=" md:flex justify-between">
+        <h1 class="text-primary text-2xl font-bold leading-tight tracking-[-0.02em]">Market Overview</h1>
+        <QouteModal title="New Quote" />
+      </div>
+      <FxRateTracker />
+
+    </section>
+    <section class="space-y-5">
+      <div class=" flex justify-between">
+        <h1 class="text-primary text-2xl font-bold leading-tight tracking-[-0.02em]">Recent Activity</h1>
+      </div>
+      <TransactionsTable />
+    </section>
+  </div>
 </template>
 
 <script setup lang="ts">
 import QouteModal from '~/components/quote/QouteModal.vue';
-const openQuoteModal = ref(false);
+import TransactionsTable from '~/components/transactions/TransactionsTable.vue';
 </script>

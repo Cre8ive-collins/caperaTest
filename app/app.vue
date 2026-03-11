@@ -1,3 +1,9 @@
+<template>
+  <NuxtLayout>
+      <NuxtPage />
+  </NuxtLayout>
+</template>
+
 <script setup lang="ts">
 const theme = useThemeStore();
 
@@ -24,9 +30,3 @@ watch(
   }
 );
 </script>
-
-<template>
-  <NuxtLayout>
-      <NuxtPage />
-  </NuxtLayout>
-</template>
