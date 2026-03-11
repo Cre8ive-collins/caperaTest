@@ -6,3 +6,7 @@
     </main>
   </div>
 </template>
+
+<script setup lang="ts">  
+import AppHeader from "~/components/shared/AppHeader.vue";
+</script>

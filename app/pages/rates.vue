@@ -6,7 +6,6 @@
                 Browse the full list of tracked fiat and stablecoin pairs.
             </p>
         </div>
-
         <FxRateTracker :show-all="true" :page-size="10" />
     </section>
 </template>
